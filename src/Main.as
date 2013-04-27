@@ -51,7 +51,7 @@ package
 			var image3:Image = new Image(ResourceManager.getInstance().getTexture("car_3")); image3.name = "car3"; 
 			image3.pivotX = image3.width / 2; image3.pivotY = image3.height / 2;
 			
-			images.push(image1, image2, image3, image1, image2, image3, image2, image1, image3);
+			images.push(image1, image2, image3, image1, image2, image3, image2, image1, image3, image1);
 			
 			var ddc1:DropDownContainer = new DropDownContainer("Cars");
 			ddc1.setContent(images);

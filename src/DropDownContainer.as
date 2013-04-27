@@ -1,5 +1,11 @@
 package
 {
+	import flash.geom.Rectangle;
+	
+	import starling.animation.Transitions;
+	import starling.animation.Tween;
+	import starling.core.Starling;
+	import starling.display.DisplayObject;
 	import starling.display.Image;
 	import starling.display.Quad;
 	import starling.display.Sprite;
@@ -18,10 +24,12 @@ package
 		//the direction the arrow is facing to
 		private static const TO_THE_RIGHT:String = "toTheRight";
 		private static const TO_THE_LEFT:String = "toTheLeft";
+		private static const COLLAPSED:String = "collapsed";
+		private static const EXPANDED:String = "expanded";
 		
 		private var _actionsSection:Sprite;
 		private var _images:Vector.<Image>;
-		private var _description:TextField;
+		private var _descriptionTxt:TextField;
 		private var _direction:String = TO_THE_RIGHT; 
 		private var _actionButtons:Array; 
 		private var _arrow:Image;
@@ -30,18 +38,30 @@ package
 		private var _imagePreviewContainer:Sprite;
 		private var _componentWidth:int;
 		private var _componentHeight:int;
+		private var _previewing:Boolean;
+		private var _previewImageSlot:Sprite;
+		private var _status:String;
+		private var _description:String;
 		
 		public function DropDownContainer(description:String, actionButtons:Vector.<ExtendedButton> = null)
 		{
-				
+			_status = COLLAPSED;
+			_description = description;		
 			var quad:Quad = new Quad(180, 25, 0xEEEDED);
 			addChild(quad);
+			quad.useHandCursor = true;
+			quad.addEventListener(TouchEvent.TOUCH, onComponentTouched);
+			
+			_componentHeight = this.height;
+			_componentWidth = this.width;
 			
 			_imageThumbs = new Vector.<Image>;
 			
-			_imagePreviewContainer = new Sprite()
-			_imagePreviewContainer.addChild(new Image(ResourceManager.getInstance().getTexture("image_preview_container")));
-			_imagePreviewContainer.pivotX = _imagePreviewContainer.width / 2;
+			_imagePreviewContainer = new Sprite();
+			var image:Image = new Image(ResourceManager.getInstance().getTexture("image_preview_container"));
+			_imagePreviewContainer.addChild(image);
+			_previewImageSlot = new Sprite();
+			_imagePreviewContainer.addChild(_previewImageSlot);
 			_imagePreviewContainer.pivotY = _imagePreviewContainer.height / 2;
 			
 			_arrow = new Image(ResourceManager.getInstance().getTexture("arrow"));
@@ -55,16 +75,52 @@ package
 			_imageThumbsContainer = new ClippedSprite();
 			addChild(_imageThumbsContainer);
 			
-			_description = new TextField(100, 25, description);
-			_description.pivotY = _description.height / 2;
+			_descriptionTxt = new TextField(100, 25, description);
+			_descriptionTxt.pivotY = _descriptionTxt.height / 2;
 			
 			setDirection(_direction);
 			
 		}
 		
+		//we dispatch an event when we click the body of the component
+
+		public function collapse():void {
+			var tween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.7, Transitions.EASE_IN_OUT);
+			tween.animate("height", 1);
+			Starling.juggler.add(tween);
+		}
+		
+		public function expand():void {
+			var tween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.7, Transitions.EASE_IN_OUT);
+			tween.animate("height", Math.ceil(_images.length / 4) * 45 + 1);
+			Starling.juggler.add(tween);
+		}
+		
+		public function get description():String
+		{
+			return _description;
+		}
+
+		private function onComponentTouched(e:TouchEvent):void {
+			
+			var touch:Touch = e.touches[0];
+			
+			if(touch.phase == TouchPhase.BEGAN){
+				if(_status == COLLAPSED){
+					dispatchEventWith("expand", true, this);
+					_status = EXPANDED;						
+				}
+				else{
+					dispatchEventWith("collapse", true, this);
+					_status = COLLAPSED;
+				}
+			}
+		}
+		
 		//here we set the initial amount of images that the component will comprehend
 		public function setContent(images:Vector.<Image>):void {
 			_images = images;
+			_imageThumbsContainer.clipRect = new Rectangle(this.x, this.y + _componentHeight - 1, _componentWidth, 1); 
 			createThumbs();
 		}
 		
@@ -73,8 +129,6 @@ package
 			
 			var counter:int = 0;
 			var row:int = 0;
-			_componentHeight = this.height;
-			_componentWidth = this.width;
 			
 			for(var i:int; i < _images.length; i ++){
 			
@@ -103,20 +157,29 @@ package
 		
 		private function onImageTouch(e:TouchEvent):void {
 			
-			var touch:Touch = e.touches[0];
 			var image:Image = Image(e.currentTarget);
+			var beganTouch:Touch = e.getTouch(image, TouchPhase.BEGAN);
+			var hoverTouch:Touch = e.getTouch(image, TouchPhase.HOVER);
 			
-			if(touch.phase == TouchPhase.HOVER){
+			if(hoverTouch && !_previewing){
 				
+				_previewing = true;
+				_previewImageSlot.removeChildren();
 				addChild(_imagePreviewContainer);
 				_imagePreviewContainer.x = _componentWidth + 5;
 				_imagePreviewContainer.y = image.y + image.height / 2;
 				
 				var previewImage:Image = getImageByName(image.name);
+				previewImage.x = _imagePreviewContainer.width / 2;
+				previewImage.y = _imagePreviewContainer.height / 2;
 				
-				_imagePreviewContainer.addChild(previewImage);
+				_previewImageSlot.addChild(previewImage);
 				
-				
+			}
+			
+			if(!hoverTouch) {
+				_previewing = false;
+				removeChild(_imagePreviewContainer);
 			}
 			
 			
@@ -148,23 +211,23 @@ package
 		private function arrangeComponents(direction:String):void {
 			
 			_arrow.y = this.height / 2;
-			_description.y = this.height / 2;
+			_descriptionTxt.y = this.height / 2;
 			//_description.border = true;
 			if(direction == TO_THE_LEFT){
 				_arrow.x = 15;
 				_arrow.rotation = Math.PI;
-				_description.hAlign = HAlign.RIGHT;
-				_description.pivotX = _description.width;
-				_description.x = this.width - 5;
+				_descriptionTxt.hAlign = HAlign.RIGHT;
+				_descriptionTxt.pivotX = _descriptionTxt.width;
+				_descriptionTxt.x = this.width - 5;
 			}
 			else {
-				_description.x = 5;
+				_descriptionTxt.x = 5;
 				_arrow.x = this.width - 15;
-				_description.hAlign = HAlign.LEFT;
+				_descriptionTxt.hAlign = HAlign.LEFT;
 			}
 			
 			addChild(_arrow);
-			addChild(_description);
+			addChild(_descriptionTxt);
 			
 		}
 		
