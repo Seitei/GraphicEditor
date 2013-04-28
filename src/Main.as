@@ -40,7 +40,7 @@ package
 		
 		private function initLibrary():void {
 			
-			//test
+			//ddc1
 			var images:Vector.<Image>;
 			images = new Vector.<Image>;
 			
@@ -57,6 +57,24 @@ package
 			ddc1.setContent(images);
 			
 			_libraryContainer.addElement(ddc1);
+			
+			//ddc2
+			var images2:Vector.<Image>;
+			images2 = new Vector.<Image>;
+			
+			var image4:Image = new Image(ResourceManager.getInstance().getTexture("toy_1")); image4.name = "toy1";
+			image4.pivotX = image4.width / 2; image4.pivotY = image4.height / 2;
+			var image5:Image = new Image(ResourceManager.getInstance().getTexture("toy_2")); image5.name = "toy2";
+			image5.pivotX = image5.width / 2; image5.pivotY = image5.height / 2;
+			var image6:Image = new Image(ResourceManager.getInstance().getTexture("toy_3")); image6.name = "toy3";
+			image6.pivotX = image6.width / 2; image6.pivotY = image6.height / 2;
+			
+			images2.push(image4, image5, image6, image4, image4, image6, image6, image5, image5, image6);
+			
+			var ddc2:DropDownContainer = new DropDownContainer("Toys");
+			ddc2.setContent(images2);
+			
+			_libraryContainer.addElement(ddc2);
 			
 			
 			

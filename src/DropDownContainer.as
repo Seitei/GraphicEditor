@@ -82,7 +82,15 @@ package
 			
 		}
 		
+		public function getContentHeight():int {
+			return Math.ceil(_images.length / 4) * 45 + 1;
+		}
+		
 		//we dispatch an event when we click the body of the component
+
+		public function get componentHeight():int {
+			return _componentHeight;
+		}
 
 		public function collapse():void {
 			var tween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.7, Transitions.EASE_IN_OUT);
@@ -101,6 +109,16 @@ package
 			return _description;
 		}
 
+		public function set setY(y:int):void {
+			this.y = y;
+			_imageThumbsContainer.clipRect.y = y + _componentHeight - 1;
+		}
+		
+		public function get setY():int {
+			return this.y;
+		}
+		
+		
 		private function onComponentTouched(e:TouchEvent):void {
 			
 			var touch:Touch = e.touches[0];
@@ -189,7 +207,7 @@ package
 		private function getImageByName(name:String):Image {
 			
 			for(var i:int; i < _images.length; i ++){
-				
+				trace(_images[i].name);
 				if(_images[i].name == name)
 					return _images[i];
 				

@@ -22,6 +22,15 @@ package utils
 		[Embed(source = "../assets/car_3.png")]
 		private static const Car3:Class;
 		
+		[Embed(source = "../assets/toy_1.jpg")]
+		private static const Toy1:Class;
+		
+		[Embed(source = "../assets/toy_2.jpg")]
+		private static const Toy2:Class;
+		
+		[Embed(source = "../assets/toy_3.jpg")]
+		private static const Toy3:Class;
+		
 		[Embed(source = "../assets/image_preview_container.png")]
 		private static const ImagePreviewContainer:Class;
 		
@@ -45,6 +54,9 @@ package utils
 			TextureAssets["car_1"] = Car1;
 			TextureAssets["car_2"] = Car2;
 			TextureAssets["car_3"] = Car3;
+			TextureAssets["toy_1"] = Toy1;
+			TextureAssets["toy_2"] = Toy2;
+			TextureAssets["toy_3"] = Toy3;
 			TextureAssets["image_preview_container"] = ImagePreviewContainer;
 				
 			/*TextureAssets["square_btn"] = SquareBtn;
