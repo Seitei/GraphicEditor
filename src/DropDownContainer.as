@@ -93,15 +93,26 @@ package
 		}
 
 		public function collapse():void {
-			var tween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.7, Transitions.EASE_IN_OUT);
-			tween.animate("height", 1);
-			Starling.juggler.add(tween);
+			var cTween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.5, Transitions.EASE_IN_OUT);
+			cTween.animate("height", 1);
+			Starling.juggler.add(cTween);
+			
+			var aTween:Tween = new Tween(_arrow, 0.2, Transitions.LINEAR);
+			aTween.animate("rotation", 0);
+			Starling.juggler.add(aTween);
 		}
 		
 		public function expand():void {
-			var tween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.7, Transitions.EASE_IN_OUT);
-			tween.animate("height", Math.ceil(_images.length / 4) * 45 + 1);
-			Starling.juggler.add(tween);
+			var eTween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.5, Transitions.EASE_IN_OUT);
+			eTween.animate("height", Math.ceil(_images.length / 4) * 45 + 1);
+			Starling.juggler.add(eTween);
+			
+			var aTween:Tween = new Tween(_arrow, 0.2, Transitions.LINEAR);
+			aTween.animate("rotation", Math.PI / 2);
+			Starling.juggler.add(aTween);
+			
+			
+			
 		}
 		
 		public function get description():String
@@ -200,6 +211,12 @@ package
 				removeChild(_imagePreviewContainer);
 			}
 			
+			//we dispatch here that we need to add an image to the board
+			if(beganTouch){
+				var clickedImage:Image = getImageByName(image.name);
+				dispatchEventWith("addImage", true, new Image(clickedImage.texture));
+			}
+			
 			
 			
 		}
@@ -207,7 +224,7 @@ package
 		private function getImageByName(name:String):Image {
 			
 			for(var i:int; i < _images.length; i ++){
-				trace(_images[i].name);
+				//trace(_images[i].name);
 				if(_images[i].name == name)
 					return _images[i];
 				

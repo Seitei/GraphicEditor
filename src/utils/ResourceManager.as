@@ -31,6 +31,9 @@ package utils
 		[Embed(source = "../assets/toy_3.jpg")]
 		private static const Toy3:Class;
 		
+		[Embed(source = "../assets/move_cursor.png")]
+		private static const MoveCursor:Class;
+		
 		[Embed(source = "../assets/image_preview_container.png")]
 		private static const ImagePreviewContainer:Class;
 		
@@ -57,6 +60,7 @@ package utils
 			TextureAssets["toy_1"] = Toy1;
 			TextureAssets["toy_2"] = Toy2;
 			TextureAssets["toy_3"] = Toy3;
+			TextureAssets["move_cursor"] = MoveCursor;
 			TextureAssets["image_preview_container"] = ImagePreviewContainer;
 				
 			/*TextureAssets["square_btn"] = SquareBtn;

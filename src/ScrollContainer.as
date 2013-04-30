@@ -36,7 +36,7 @@ package
 			
 			for each(var ddc:DropDownContainer in result){
 				
-				var tween:Tween = new Tween(ddc, 0.7, Transitions.EASE_IN_OUT);
+				var tween:Tween = new Tween(ddc, 0.5, Transitions.EASE_IN_OUT);
 				tween.animate("setY", ddc.y - e.data.getContentHeight());
 				Starling.juggler.add(tween);
 			}
@@ -50,7 +50,7 @@ package
 			
 			for each(var ddc:DropDownContainer in result){
 				
-				var tween:Tween = new Tween(ddc, 0.7, Transitions.EASE_IN_OUT);
+				var tween:Tween = new Tween(ddc, 0.5, Transitions.EASE_IN_OUT);
 				tween.animate("setY", ddc.y + e.data.getContentHeight());
 				Starling.juggler.add(tween);
 			}

@@ -12,6 +12,7 @@ package
 		
 		private var _libraryContainer:ScrollContainer;
 		private var _layersContainer:ScrollContainer;
+		private var _board:Sprite;
 		
 		public function Main() 
 		{
@@ -34,8 +35,29 @@ package
 			
 			_layersContainer.x = stage.stageWidth - _layersContainer.width;
 			
+			//here we draw the stuff
+			_board = new Sprite();
+			_board.addChild(new Quad(stage.width - _layersContainer.width - _libraryContainer.width, stage.height, 0xffffff));
+			_board.x = _libraryContainer.width;
+			addChildAt(_board, 0);
+			
+			addEventListener("addImage", onAddImage);
+			
 			initLibrary();
 				
+		}
+		
+		private function onAddImage(e:Event, image:Image):void {
+			
+			var edImage:EditableImage = new EditableImage(image);
+			
+			edImage.pivotX = edImage.width / 2;
+			edImage.pivotY = edImage.height / 2;
+			
+			edImage.x = _board.width / 2;
+			edImage.y = _board.height / 2;
+			
+			_board.addChild(edImage);
 		}
 		
 		private function initLibrary():void {
