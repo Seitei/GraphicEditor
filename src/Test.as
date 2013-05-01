@@ -11,6 +11,7 @@ package
 	import starling.events.Touch;
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
+	import starling.utils.Color;
 	
 	public class Test extends Sprite
 	{
@@ -20,6 +21,7 @@ package
 		
 		private var _sprite1:Sprite;
 		private var _sprite2:Sprite;
+		private var reverse:Boolean;
 		
 		public function Test()
 		{
@@ -35,46 +37,76 @@ package
 			
 			
 			_sprite2 = new Sprite();
-			_quad2 = new Quad(stage.stageWidth / 8, stage.stageHeight / 8, 0xff0000);
+			_quad2 = new Quad(100, 100, 0xff0000);
 			_sprite2.addChild(_quad2);
 			_sprite2.x = stage.stageWidth / 2;
 			_sprite2.y = stage.stageHeight / 2;
 			
-			_sprite2.pivotX = _sprite2.width;
-			_sprite2.pivotY = _sprite2.height;
 			_sprite1.addChild(_sprite2);
-			
-			_sprite2.addEventListener(TouchEvent.TOUCH, onSpriteClicked);
+			_quad2.addEventListener(TouchEvent.TOUCH, onSpriteClicked);
+			//_quad2.pivotY = _quad2.height;
 		}
 		
 		private function onSpriteClicked(e:TouchEvent):void {
 			
-			var sprite:Sprite = Sprite(e.currentTarget);
-			var moveTouch:Touch = e.getTouch(sprite, TouchPhase.MOVED);
-			var beganTouch:Touch = e.getTouch(sprite, TouchPhase.BEGAN);
+			var quad:Quad = Quad(e.currentTarget);
+			var moveTouch:Touch = e.getTouch(quad, TouchPhase.MOVED);
+			var beganTouch:Touch = e.getTouch(quad, TouchPhase.BEGAN);
+			var endedTouch:Touch = e.getTouch(quad, TouchPhase.ENDED);
 			
-			/*if(beganTouch){
-				sprite.pivotX = 0;
-				sprite.pivotY = 0;
-				sprite.x -= sprite.width;
-				sprite.y -= sprite.height;
+			if(beganTouch){
+		
+				drawQuad(quad.pivotX, quad.pivotY, 8, Color.GREEN);
+				drawQuad(quad.x, quad.y, 5, Color.WHITE);
 				
-			}*/
+				quad.height += 50;
+				if(reverse){
+					
+					
+					quad.pivotY += quad.height;
+					quad.y += quad.height;
+					
+					
+					
+					
+				}
+			}
 				
 			if(moveTouch){
-				//moveTouch.getLocation(sprite.parent, sHelperPoint);	
 				
-				sprite.height -= moveTouch.getMovement(this.parent).y;
 				
-				/*sprite.x = sHelperPoint.x;
-				sprite.y = sHelperPoint.y;*/
+				quad.height += moveTouch.getMovement(this.parent).y;
 				
+				trace(quad.pivotY);
+				trace(quad.y);
+				trace(quad.height);
+				
+			}
+			
+			if(endedTouch){
+				//reverse = true;
+				quad.pivotY += quad.height - 50;
+				quad.y += quad.height;
+				
+				//quad.height += 20;
+				drawQuad(quad.pivotX, quad.pivotY, 8, Color.BLACK);
+				drawQuad(quad.x, quad.y, 5, Color.LIME);
 			}
 		
 		}
 
 			
-			
+		
+		
+		
+		
+		
+		private function drawQuad(xCoord:Number, yCoord:Number, size:int, color:uint):void {
+			var quad:Quad = new Quad(size, size, color);
+			quad.x = xCoord;
+			quad.y = xCoord;
+			_sprite2.addChild(quad);
+		}
 			
 			
 			

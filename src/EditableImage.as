@@ -38,6 +38,10 @@ package
 		private var _botMidAnchor:Quad;
 		private var _botRightAnchor:Quad;
 		private var _resizeDirection:int;
+		private var _previousAnchor:String;
+		private var _originalHeight:Number;
+		private var _originalWidth:Number;
+		private var _heightIncrement:Number;
 		
 		public function EditableImage(image:Image)
 		{
@@ -48,7 +52,8 @@ package
 			_imageUI = new Sprite();
 			_imageUI.visible = false;
 			addChild(_imageUI);
-			
+			_originalWidth = _image.width;
+			_originalHeight = _image.height;
 			setupAnchorPoints();
 			
 		}
@@ -142,11 +147,12 @@ package
 		}
 		
 		private function verticalResize(e:TouchEvent):void {
+			
 			var anchor:Quad = Quad(e.currentTarget);
 			var beganTouch:Touch = e.getTouch(anchor, TouchPhase.BEGAN);
 			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
-			
+			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
 			
 			//change the mouse appereance
 			if(hoverTouch){
@@ -158,27 +164,37 @@ package
 			
 			//configure the new pivot and position
 			if(beganTouch){
-				if(anchor.name == "topMid"){
-					_image.pivotX = _image.width;
-					_image.pivotY = _image.height;
-					_image.x += _image.width;
-					_image.y += _image.height;
-					_resizeDirection = -1;
+				
+				if(anchor.name != _previousAnchor || _previousAnchor == ""){
+					if(anchor.name == "topMid"){
+						_image.pivotX = _originalWidth;
+						_image.pivotY = _originalHeight;
+						_image.x += _image.width;
+						_image.y += _image.height;
+						_resizeDirection = -1;
+					}
+					
+					if(anchor.name == "botMid"){
+						_image.pivotX = 0;
+						_image.pivotY = 0;
+	
+						if(_previousAnchor == "topMid"){
+							_image.x -= _image.width;
+							_image.y -= _image.height;
+						}
+						
+						_resizeDirection = 1;
+					}
 				}
-				else {
-					_image.pivotX = 0;
-					_image.pivotY = 0;
-				/*	_image.x -= _image.width;
-					_image.y -= _image.height;*/
-					_resizeDirection = 1;
-				}
+				
+				_previousAnchor = anchor.name;
 			}
 			
 			//resize
 			if(moveTouch){
-				trace(moveTouch.getMovement(this.parent).y * _resizeDirection);
-				_image.height += moveTouch.getMovement(this.parent).y * _resizeDirection;
 				
+				_image.height += moveTouch.getMovement(this.parent).y * _resizeDirection;
+								
 				if(anchor.name == "topMid"){
 					_topLeftAnchor.y += moveTouch.getMovement(this.parent).y;
 					_topMidAnchor.y += moveTouch.getMovement(this.parent).y;
@@ -191,8 +207,11 @@ package
 				}
 				
 			}
-				
-				
+			
+			if(endedTouch){
+				//_heightIncrement = _image.height - _originalHeight;
+			}
+			
 			
 			
 		}
