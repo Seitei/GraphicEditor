@@ -16,9 +16,21 @@ package utils
 		[Embed(source = "../assets/resize_vertical.png")]
 		private static const ResizeVerticalCursor:Class;
 		
+		[Embed(source = "../assets/resize_horizontal.png")]
+		private static const ResizeHorizontalCursor:Class;
+		
+		[Embed(source = "../assets/resize_topleft.png")]
+		private static const ResizeTopleft:Class;
+		
+		[Embed(source = "../assets/resize_topright.png")]
+		private static const ResizeTopright:Class;
+		
 		private static var Cursors:Dictionary = new Dictionary();
 		Cursors["move_cursor"] = MoveCursor;
 		Cursors["resize_vertical"] = ResizeVerticalCursor;
+		Cursors["resize_horizontal"] = ResizeHorizontalCursor;
+		Cursors["resize_topleft"] = ResizeTopleft;
+		Cursors["resize_topright"] = ResizeTopright ;
 		
 		public static function setMouse(cursor:String):void {
 
