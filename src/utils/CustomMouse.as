@@ -25,15 +25,21 @@ package utils
 		[Embed(source = "../assets/resize_topright.png")]
 		private static const ResizeTopright:Class;
 		
+		[Embed(source = "../assets/rotate.png")]
+		private static const Rotate:Class;
+		
 		private static var Cursors:Dictionary = new Dictionary();
 		Cursors["move_cursor"] = MoveCursor;
 		Cursors["resize_vertical"] = ResizeVerticalCursor;
 		Cursors["resize_horizontal"] = ResizeHorizontalCursor;
 		Cursors["resize_topleft"] = ResizeTopleft;
-		Cursors["resize_topright"] = ResizeTopright ;
+		Cursors["resize_topright"] = ResizeTopright;
+		Cursors["rotate"] = Rotate;
 		
 		public static function setMouse(cursor:String):void {
 
+			if(cursor == Mouse.cursor) return;
+			
 			// Create a MouseCursorData object
 			var cursorData:MouseCursorData = new MouseCursorData();
 			// Specify the hotspot

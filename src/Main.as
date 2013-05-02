@@ -1,9 +1,12 @@
 package
 {
+	import flash.ui.Keyboard;
+	
 	import starling.display.Image;
 	import starling.display.Quad;
 	import starling.display.Sprite;
 	import starling.events.Event;
+	import starling.events.KeyboardEvent;
 	
 	import utils.ResourceManager;
 
@@ -42,10 +45,15 @@ package
 			addChildAt(_board, 0);
 			
 			addEventListener("addImage", onAddImage);
-			
+			addEventListener("deleteImage", onDeleteImage);
 			initLibrary();
 				
 		}
+		
+		private function onDeleteImage(e:Event, image:EditableImage):void {
+			_board.removeChild(image);
+		}
+		
 		
 		private function onAddImage(e:Event, image:Image):void {
 			
