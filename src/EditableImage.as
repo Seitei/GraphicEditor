@@ -20,6 +20,7 @@ package
 	import starling.events.Touch;
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
+	import starling.text.TextField;
 	import starling.utils.Color;
 	
 	import utils.CustomMouse;
@@ -28,6 +29,7 @@ package
 	public class EditableImage extends Sprite
 	{
 		
+		private static const PI:Number = Math.PI;
 		private var _image:Image;
 		private var _selected:Boolean;
 		private var _imageUI:Sprite;
@@ -49,12 +51,22 @@ package
 		private var _heightIncrement:Number;
 		private var _rotationAnchor:Quad;
 		private var _rotationVector:Point;
-		private static const PI:Number = Math.PI;
+		private var _border:Sprite;
+		private var _finalWidth:Number;
+		private var _finalHeight:Number;
 		
 		public function EditableImage(image:Image)
 		{
 			_image = image;
 			addChild(_image);
+			
+			_image.pivotX = _image.width / 2; 
+			_image.pivotY = _image.height / 2;
+			_image.x = _image.width / 2;
+			_image.y = _image.height / 2;
+			
+			var text:TextField = new TextField(_image.width, _image.height, "");
+			text.border;
 			_image.useHandCursor = true;
 			_image.addEventListener(TouchEvent.TOUCH, onTouch);
 			_imageUI = new Sprite();
@@ -63,13 +75,131 @@ package
 			_originalWidth = _image.width;
 			_originalHeight = _image.height;
 			_rotationVector = new Point();
-			setupAnchorPoints();
+			createBorder();
 			addEventListener(Event.ADDED_TO_STAGE, onAdded);
+			select(true);
+		}
+		
+		public function createBorder():void
+		{
+			_finalWidth = 0;
+			_finalHeight = 0;
+			_border = new Sprite();
+			_border.touchable = false;
+			//_border.visible = false;
+			addChild(_border);
+				
+			for (var i:int=0; i<4; ++i)
+				_border.addChild(new Quad(1.0, 1.0));
+				
+			updateBorder();
+		}
+		
+		private function updateBorder(anchor:String = "", valueX:Number = NaN, valueY:Number = NaN):void
+		{
 			
+			var topLine:Quad    = _border.getChildAt(0) as Quad;
+			var rightLine:Quad  = _border.getChildAt(1) as Quad;
+			var bottomLine:Quad = _border.getChildAt(2) as Quad;
+			var leftLine:Quad   = _border.getChildAt(3) as Quad;
+			
+			if(anchor == "midRight"){
+				topLine.width    += valueX;
+				bottomLine.width += valueX;
+				rightLine.x 	 += valueX;
+			}
+			
+			if(anchor == "midLeft"){
+				topLine.width    += valueX;
+				topLine.x        += valueX * _resizeDirectionX;
+				bottomLine.width += valueX;
+				bottomLine.x     += valueX * _resizeDirectionX;
+				leftLine.x  	 += valueX * _resizeDirectionX;
+			}
+			
+			if(anchor == "topMid"){
+				topLine.y        -= valueY;
+				leftLine.height  -= valueY * _resizeDirectionY;
+				leftLine.y 		 += valueY * _resizeDirectionY;
+				rightLine.height -= valueY * _resizeDirectionY;
+				rightLine.y 	 += valueY * _resizeDirectionY;
+			}
+			
+			if(anchor == "botMid"){
+				bottomLine.y     += valueY;
+				leftLine.height  += valueY * _resizeDirectionY;
+				rightLine.height += valueY * _resizeDirectionY;
+			}
+			
+			if(anchor == "topRight"){
+				topLine.width    += valueX;
+				bottomLine.width += valueX;
+				rightLine.x 	 += valueX;
+				topLine.y        -= valueY;
+				leftLine.height  -= valueY * _resizeDirectionY;
+				leftLine.y 		 += valueY * _resizeDirectionY;
+				rightLine.height -= valueY * _resizeDirectionY;
+				rightLine.y 	 += valueY * _resizeDirectionY;
+			}
+			
+			if(anchor == "topLeft"){
+				topLine.width    += valueX;
+				topLine.x        += valueX * _resizeDirectionX;
+				bottomLine.width += valueX;
+				bottomLine.x     += valueX * _resizeDirectionX;
+				leftLine.x  	 += valueX * _resizeDirectionX;
+				topLine.y        -= valueY;
+				leftLine.height  -= valueY * _resizeDirectionY;
+				leftLine.y 		 += valueY * _resizeDirectionY;
+				rightLine.height -= valueY * _resizeDirectionY;
+				rightLine.y 	 += valueY * _resizeDirectionY;
+			}
+			
+			if(anchor == "botLeft"){
+				topLine.width    += valueX;
+				topLine.x        += valueX * _resizeDirectionX;
+				bottomLine.width += valueX;
+				bottomLine.x     += valueX * _resizeDirectionX;
+				leftLine.x  	 += valueX * _resizeDirectionX;
+				bottomLine.y     += valueY;
+				leftLine.height  += valueY * _resizeDirectionY;
+				rightLine.height += valueY * _resizeDirectionY;
+			}
+			
+			if(anchor == "botRight"){
+				bottomLine.y     += valueY;
+				leftLine.height  += valueY * _resizeDirectionY;
+				rightLine.height += valueY * _resizeDirectionY;
+				topLine.width    += valueX;
+				bottomLine.width += valueX;
+				rightLine.x 	 += valueX;
+			}
+			
+			
+			
+			if(anchor == ""){
+				topLine.width    = _image.width;
+				bottomLine.width = _image.width;
+				bottomLine.y     = _image.height - 1;
+				rightLine.height = _image.height;
+				rightLine.x 	 = _image.width; - 1;
+				leftLine.height  = _image.height;
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			topLine.color = rightLine.color = bottomLine.color = leftLine.color = Color.BLUE;
 		}
 		
 		private function onAdded(e:Event):void {
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			setupAnchorPoints();
 		}
 		
 		private function onKeyDown(e:KeyboardEvent):void {
@@ -87,6 +217,14 @@ package
 			
 			if(hoverTouch){
 				CustomMouse.setMouse("move_cursor");
+				_border.visible = true;
+			}
+			
+			if(!hoverTouch && !_selected) {
+				_border.visible = false;
+			}
+			
+			if(beganTouch){
 				select(true);
 			}
 			
@@ -100,10 +238,13 @@ package
 			
 			_selected = value;
 			
-			if(value)
+			if(value){
+				_border.visible = true;				
 				_imageUI.visible = true;
-			else
+			}
+			else{
 				_imageUI.visible = false;
+			}
 		}
 		
 		private function setupAnchorPoints():void {
@@ -143,13 +284,17 @@ package
 				}
 			}
 			
-			_rotationAnchor.pivotX = _rotationAnchor.width / 2;
+			/*_rotationAnchor.pivotX = _rotationAnchor.width / 2;
 			_rotationAnchor.pivotY = _rotationAnchor.height / 2;
 			
 			_rotationAnchor.x = _topMidAnchor.x;
 			_rotationAnchor.y = _topMidAnchor.y - 15;
 			
-			_imageUI.addChild(_rotationAnchor);
+			_imageUI.addChild(_rotationAnchor);*/
+			/*_imageUI.pivotX = _originalWidth / 2;
+			_imageUI.pivotY = _originalHeight / 2;
+			_imageUI.x = _imageUI.pivotX
+			_imageUI.y = _imageUI.pivotY*/
 			
 			_topLeftAnchor.addEventListener(TouchEvent.TOUCH, diagonalResize);
 			_topMidAnchor.addEventListener(TouchEvent.TOUCH, verticalResize);
@@ -159,10 +304,10 @@ package
 			_botLeftAnchor.addEventListener(TouchEvent.TOUCH, diagonalResize);
 			_botMidAnchor.addEventListener(TouchEvent.TOUCH, verticalResize);
 			_botRightAnchor.addEventListener(TouchEvent.TOUCH, diagonalResize);
-			_rotationAnchor.addEventListener(TouchEvent.TOUCH, rotate);
+			//_rotationAnchor.addEventListener(TouchEvent.TOUCH, rotate);
 			//we need to recalculate the pivot since we are altering the image.
-			this.pivotX = this.width / 2;
-			this.pivotY = this.height / 2;
+			/*this.pivotX = this.width / 2;
+			this.pivotY = this.height / 2;*/
 		}
 		
 		private function rotate(e:TouchEvent):void {
@@ -174,16 +319,32 @@ package
 			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
 			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
 			
-			if(hoverTouch){
-				if(_image.pivotX != _originalWidth / 2){
-					_image.pivotX = _originalWidth / 2;
-					_image.pivotY = _originalHeight / 2;
+			if(beganTouch){
+				
+				var quad1:Quad = new Quad(5, 5, Color.BLUE);
+				quad1.x = _image.pivotX;
+				quad1.y = _image.pivotY;
+				addChild(quad1);
+				
+				if(_image.pivotX == 0){
 					_image.x += _image.width / 2;
 					_image.y += _image.height / 2;
+					_image.pivotX = _originalWidth / 2;
+					_image.pivotY = _originalHeight / 2;
+					
+					_imageUI.pivotX = _originalWidth / 2;
+					_imageUI.pivotY = _originalHeight / 2;
+					_imageUI.x = _imageUI.pivotX
+					_imageUI.y = _imageUI.pivotY
 				}
-			}
-			
-			if(beganTouch){
+				
+				if(_image.pivotX == 100){
+					_image.x -= _image.width / 2;
+					_image.y += _image.height / 2;
+					_image.pivotX = _originalWidth / 2;
+					_image.pivotY = _originalHeight / 2;
+				}
+				
 				
 			}
 			
@@ -195,25 +356,24 @@ package
 				_rotationVector.x = xCoord;
 				_rotationVector.y = yCoord;
 				
-				var diff:Point = _rotationVector.subtract(new Point(this.x + (_image.width - _originalWidth) / 2, this.y + (_image.height - _originalHeight) / 2)); 
+				var diff:Point = _rotationVector.subtract(new Point(this.x + (_image.width - _originalWidth) / 2, 
+																	this.y + (_image.height - _originalHeight) / 2)); 
 				
-				this.rotation = Math.atan2(diff.y, diff.x) + PI / 2;
+				_image.rotation = Math.atan2(diff.y, diff.x) + PI / 2;
 				
-				for(var i:int = 1; i <= 9; i++){
-					
+				_imageUI.rotation = _image.rotation;
+				/*for(var i:int = 1; i <= 9; i++){
 					if(i != 5){
-						
 						_anchorsArray[i].rotation = -this.rotation;
-						_imageUI.addChild(_anchorsArray[i]);
 					}
-					
-					
-				}
+				}*/
 			}
 			
 			if(endedTouch){
 				CustomMouse.setAuto();
 			}
+			
+			_previousAnchor = anchor.name;
 		}
 		
 		private function horizontalResize(e:TouchEvent):void {
@@ -229,29 +389,15 @@ package
 				CustomMouse.setMouse("resize_horizontal");
 			}
 			
-			//configure the new pivot and position
 			if(beganTouch){
 				
-				if(anchor.name != _previousAnchor || _previousAnchor == ""){
-					if(anchor.name == "midLeft"){
-						if(_image.pivotX != _originalWidth){
-							_image.pivotX = _originalWidth;
-							_image.x += _image.width;
-						}
-						_resizeDirectionX = -1;
-					}
-					
-					if(anchor.name == "midRight"){
-						if(_image.pivotX != 0){
-							_image.pivotX = 0;
-							_image.x -= _image.width / 2;
-						}
-						
-						_resizeDirectionX = 1;
-					}
-				}
-				
+				_finalWidth = 0;
 				_previousAnchor = anchor.name;
+				if(anchor.name == "midRight")
+					_resizeDirectionX = 1;
+				
+				if(anchor.name == "midLeft")
+					_resizeDirectionX = -1;
 			}
 			
 			//resize
@@ -259,42 +405,104 @@ package
 				
 				var movementX:Number = moveTouch.getMovement(this.parent).x;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
-				var transformedMovementX:Number = movementX;
-				var transformedMovementY:Number = movementY;
 				
+				/*transformedMovementX = movementX * Math.cos(_image.rotation); 
+				transformedMovementY = movementY * Math.sin(_image.rotation);*/
 				
+				_finalWidth += movementX * _resizeDirectionX;
 				
-				//if(this.rotation){
-					transformedMovementX = _resizeDirectionX * movementX * Math.cos(this.rotation); 
-					transformedMovementY = movementY * Math.sin(this.rotation);
-					/*trace(transformedMovementX);
-					trace(transformedMovementY);*/
-				//}
-				
-				_image.width += transformedMovementX + transformedMovementY;
+				updateBorder(anchor.name, movementX * _resizeDirectionX);
 				
 				if(anchor.name == "midLeft"){
-					_topLeftAnchor.x += transformedMovementX + transformedMovementY;
-					_midLeftAnchor.x += transformedMovementX + transformedMovementY;
-					_botLeftAnchor.x += transformedMovementX + transformedMovementY;
+					_topLeftAnchor.x += movementX;
+					_midLeftAnchor.x += movementX;
+					_botLeftAnchor.x += movementX; 
 				}
 				else {
-					_topRightAnchor.x += transformedMovementX + transformedMovementY;
-					_midRightAnchor.x += transformedMovementX + transformedMovementY;
-					_botRightAnchor.x += transformedMovementX + transformedMovementY;
+					_topRightAnchor.x += movementX;
+					_midRightAnchor.x += movementX;
+					_botRightAnchor.x += movementX;
 				}
 				
-				_topMidAnchor.x += (transformedMovementX + transformedMovementY) / 2;
-				_botMidAnchor.x += (transformedMovementX + transformedMovementY) / 2;
-				_rotationAnchor.x += (transformedMovementX + transformedMovementY) / 2;
+				_topMidAnchor.x += movementX / 2;
+				_botMidAnchor.x += movementX / 2;
+				_rotationAnchor.x += movementX / 2;
 			}
+			
 			if(endedTouch){
 				CustomMouse.setAuto();
+				_image.width += _finalWidth;
+				_image.x += (_finalWidth / 2) * _resizeDirectionX;
 			}
 		}
 		
+		
+		private function verticalResize(e:TouchEvent):void {
+			
+			var anchor:Quad = Quad(e.currentTarget);
+			var beganTouch:Touch = e.getTouch(anchor, TouchPhase.BEGAN);
+			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
+			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
+			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
+			
+			//change the mouse appereance
+			if(hoverTouch){
+				CustomMouse.setMouse("resize_vertical");
+			}
+			
+			//configure the new pivot and position
+			if(beganTouch){
+				_finalHeight = 0;
+				if(anchor.name != _previousAnchor || _previousAnchor == ""){
+					if(anchor.name == "topMid"){
+						_resizeDirectionY = -1;
+					}
+					
+					if(anchor.name == "botMid"){
+						_resizeDirectionY = 1;
+					}
+				}
+				_previousAnchor = anchor.name;
+			}
+			
+			//resize
+			if(moveTouch){
+				
+				var movementX:Number = moveTouch.getMovement(this.parent).y;
+				var movementY:Number = moveTouch.getMovement(this.parent).y;
+				
+				_finalHeight += movementY * _resizeDirectionY;
+				
+				updateBorder(anchor.name, 0, movementY * _resizeDirectionY);
+				
+				if(anchor.name == "topMid"){
+					_topLeftAnchor.y += movementY;
+					_topMidAnchor.y += movementY;
+					_topRightAnchor.y += movementY;
+				}
+				else {
+					_botLeftAnchor.y += movementY;
+					_botMidAnchor.y += movementY;
+					_botRightAnchor.y += movementY;
+				}
+				
+				_midLeftAnchor.y += movementY / 2;
+				_midRightAnchor.y += movementY / 2;
+			}
+			
+			if(endedTouch){
+				CustomMouse.setAuto();
+				_image.height += _finalHeight;
+				_image.y += (_finalHeight / 2) * _resizeDirectionY;
+			}
+				
+			
+		}
+		
+	
 		//////////////////////////////////////////////////////
-
+		
+		
 		private function diagonalResize(e:TouchEvent):void {
 			
 			var anchor:Quad = Quad(e.currentTarget);
@@ -314,62 +522,30 @@ package
 			//configure the new pivot and position
 			if(beganTouch){
 				
+				_finalHeight = 0;
+				_finalWidth = 0;
+				
 				if(anchor.name != _previousAnchor || _previousAnchor == ""){
 					if(anchor.name == "topLeft"){
-						if(_image.pivotX != _originalWidth){
-							_image.pivotX = _originalWidth;
-							_image.x += _image.width;
-						}
-						if(_image.pivotY != _originalHeight){
-							_image.pivotY = _originalHeight;
-							_image.y += _image.height;
-						}
 						_resizeDirectionX = -1;
 						_resizeDirectionY = -1;
 					}
 					
 					if(anchor.name == "topRight"){
-						if(_image.pivotX != 0){
-							_image.pivotX = 0;
-							_image.x -= _image.width;
-						}
-						if(_image.pivotY != _originalHeight){
-							_image.pivotY = _originalHeight;
-							_image.y += _image.height;
-						}
 						_resizeDirectionX = 1;
 						_resizeDirectionY = -1;
 					}
 					
 					if(anchor.name == "botLeft"){
-						if(_image.pivotX != _originalWidth){
-							_image.pivotX = _originalWidth;
-							_image.x += _image.width;
-						}
-						if(_image.pivotY != 0){
-							_image.pivotY = 0;
-							_image.y -= _image.height;
-						}
 						_resizeDirectionX = -1;
 						_resizeDirectionY = 1;
 					}
 					
 					if(anchor.name == "botRight"){
-						if(_image.pivotX != 0){
-							_image.pivotX = 0;
-							_image.x -= _image.width;
-						}
-						if(_image.pivotY != 0){
-							_image.pivotY = 0;
-							_image.y -= _image.height;
-						}
 						_resizeDirectionX = 1;
 						_resizeDirectionY = 1;
 					}
-					
-					
 				}
-				
 				_previousAnchor = anchor.name;
 			}
 			
@@ -379,8 +555,10 @@ package
 				var movementX:Number = moveTouch.getMovement(this.parent).x;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
 				
-				_image.width += movementX * _resizeDirectionX;
-				_image.height += movementY * _resizeDirectionY;
+				_finalWidth += movementX * _resizeDirectionX;
+				_finalHeight += movementY * _resizeDirectionY;
+				
+				updateBorder(anchor.name, movementX * _resizeDirectionX, movementY * _resizeDirectionY);
 				
 				if(anchor.name == "topLeft"){
 					_topLeftAnchor.x += movementX; _topLeftAnchor.y += movementY;
@@ -425,87 +603,16 @@ package
 			
 			if(endedTouch){
 				CustomMouse.setAuto();
+				_image.width += _finalWidth;
+				_image.height += _finalHeight;
+				_image.x += (_finalWidth / 2) * _resizeDirectionX;
+				_image.y += (_finalHeight / 2) * _resizeDirectionY;
 			}
 			
 		}
 		
 		
 		//////////////////////////////////////////////////////
-		
-		
-		
-		private function verticalResize(e:TouchEvent):void {
-			
-			var anchor:Quad = Quad(e.currentTarget);
-			var beganTouch:Touch = e.getTouch(anchor, TouchPhase.BEGAN);
-			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
-			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
-			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
-			
-			//change the mouse appereance
-			if(hoverTouch){
-				CustomMouse.setMouse("resize_vertical");
-			}
-			
-			//configure the new pivot and position
-			if(beganTouch){
-				
-				if(anchor.name != _previousAnchor || _previousAnchor == ""){
-					
-					if(anchor.name == "topMid"){
-						if(_image.pivotY != _originalHeight){
-							_image.pivotY = _originalHeight;
-							_image.y += _image.height;
-						}
-						_resizeDirectionY = -1;
-						
-						
-					}
-					
-					if(anchor.name == "botMid"){
-						if(_image.pivotY != 0){
-							_image.pivotY = 0;
-							_image.y -= _image.height;
-						}
-						_resizeDirectionY = 1;
-					}
-				}
-				_previousAnchor = anchor.name;
-			}
-			
-			//resize
-			if(moveTouch){
-				
-				var movement:Number = moveTouch.getMovement(this.parent).y;
-				
-				_image.height += movement * _resizeDirectionY;
-					
-				if(anchor.name == "topMid"){
-					_topLeftAnchor.y += movement;
-					_topMidAnchor.y += movement;
-					_topRightAnchor.y += movement;
-				}
-				else {
-					_botLeftAnchor.y += movement;
-					_botMidAnchor.y += movement;
-					_botRightAnchor.y += movement;
-				}
-				
-				_midLeftAnchor.y += movement / 2;
-				_midRightAnchor.y += movement / 2;
-			}
-			
-			if(endedTouch){
-				CustomMouse.setAuto();
-			}
-				
-			
-		}
-		
-		
-		
-	
-		
 		
 		
 		
