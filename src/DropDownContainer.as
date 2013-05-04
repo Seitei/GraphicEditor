@@ -13,6 +13,7 @@ package
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
 	import starling.extensions.ClippedSprite;
+	import starling.filters.BlurFilter;
 	import starling.text.TextField;
 	import starling.utils.Color;
 	import starling.utils.HAlign;
@@ -46,20 +47,29 @@ package
 		private var _description:String;
 		private var _hoverQuad:Quad;
 		
+		[Embed(source='../assets/fonts/HelveticaNeueLTCom-Roman.ttf', fontFamily="Helvetica", mimeType="application/x-font", fontWeight="normal", fontStyle="normal", advancedAntiAliasing="true", embedAsCFF="false")] 
+		private static var HelveticaFont:Class;
+		
+		//text filter
+		private var _dropShadowFilter:BlurFilter = BlurFilter.createDropShadow(0.6, 4.71238898, 0x000000, 1, 0, 1);
+		
 		public function DropDownContainer(description:String, actionButtons:Vector.<ExtendedButton> = null)
 		{
 			_status = COLLAPSED;
 			_description = description;		
-			var quad:Quad = new Quad(180, 25, 0xEEEDED);
-			addChild(quad);
-			quad.useHandCursor = true;
-			quad.addEventListener(TouchEvent.TOUCH, onComponentTouched);
+			var componentQuad:Quad = new Quad(180, 25, 0x494949);
+			addChild(componentQuad);
+			componentQuad.useHandCursor = true;
+			componentQuad.addEventListener(TouchEvent.TOUCH, onComponentTouched);
 			
-			_hoverQuad = new Quad(quad.width, quad.height, 0xffffff);
-			_hoverQuad.alpha = 0.2;
+			_hoverQuad = new Quad(componentQuad.width, componentQuad.height, 0xffffff);
+			_hoverQuad.alpha = 0.05;
 			addChild(_hoverQuad);
 			_hoverQuad.visible = false;
 			_hoverQuad.touchable = false;
+			
+			var darkLine:Quad = new Quad(this.width, 1, 0x000000); darkLine.alpha = 0.2; darkLine.y = this.height - 1; addChild(darkLine);
+			var lightLine:Quad = new Quad(this.width, 1, 0xffffff); lightLine.alpha = 0.1; lightLine.y = this.height; addChild(lightLine);
 			
 			_componentHeight = this.height;
 			_componentWidth = this.width;
@@ -84,13 +94,20 @@ package
 			_imageThumbsContainer = new ClippedSprite();
 			addChild(_imageThumbsContainer);
 			
-			_descriptionTxt = new TextField(100, 25, description);
+			_descriptionTxt = new TextField(100, 25, description, "Helvetica", 12);
+			_descriptionTxt.color = 0xD0D2D3;
+			_descriptionTxt.filter = _dropShadowFilter;
 			_descriptionTxt.pivotY = _descriptionTxt.height / 2;
 			_descriptionTxt.touchable = false;
 			
 			setDirection(_direction);
 		}
 		
+		public function get status():String
+		{
+			return _status;
+		}
+
 		public function getContentHeight():int {
 			return Math.ceil(_images.length / 4) * 45 + 1;
 		}
@@ -101,24 +118,27 @@ package
 			return _componentHeight;
 		}
 
-		public function collapse():void {
-			var cTween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.5, Transitions.EASE_IN_OUT);
-			cTween.animate("height", 1);
-			Starling.juggler.add(cTween);
+		public function expandOrCollapse():void {
+			//thumbs
+			var tTween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.5, Transitions.EASE_IN_OUT);
+			if(_status == EXPANDED) tTween.animate("height", 1);
+			if(_status == COLLAPSED) tTween.animate("height", Math.ceil(_images.length / 4) * 45 + 1);
+			tTween.onComplete = onTweenComplete;
+			Starling.juggler.add(tTween);
 			
+			//arrow
 			var aTween:Tween = new Tween(_arrow, 0.2, Transitions.LINEAR);
-			aTween.animate("rotation", 0);
+			if(_status == EXPANDED) aTween.animate("rotation", 0);
+			if(_status == COLLAPSED) aTween.animate("rotation", Math.PI / 2);
 			Starling.juggler.add(aTween);
 		}
 		
-		public function expand():void {
-			var eTween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.5, Transitions.EASE_IN_OUT);
-			eTween.animate("height", Math.ceil(_images.length / 4) * 45 + 1);
-			Starling.juggler.add(eTween);
-			
-			var aTween:Tween = new Tween(_arrow, 0.2, Transitions.LINEAR);
-			aTween.animate("rotation", Math.PI / 2);
-			Starling.juggler.add(aTween);
+		private function onTweenComplete():void {
+			if(_status == COLLAPSED)
+				_status = EXPANDED;
+			else
+				_status = COLLAPSED;
+			dispatchEventWith("blockElements", true);
 		}
 		
 		public function get description():String
@@ -145,12 +165,12 @@ package
 			
 			if(beganTouch){
 				if(_status == COLLAPSED){
-					dispatchEventWith("expand", true, this);
-					_status = EXPANDED;						
+					expandOrCollapse();
+					dispatchEventWith("collapseOrExpand", true, this);
 				}
 				else{
-					dispatchEventWith("collapse", true, this);
-					_status = COLLAPSED;
+					expandOrCollapse();
+					dispatchEventWith("collapseOrExpand", true, this);
 				}
 			}
 			
@@ -166,7 +186,10 @@ package
 		//here we set the initial amount of images that the component will comprehend
 		public function setContent(images:Vector.<Image>):void {
 			_images = images;
-			_imageThumbsContainer.clipRect = new Rectangle(this.x, this.y + _componentHeight - 1, _componentWidth, 1); 
+			_imageThumbsContainer.clipRect = new Rectangle(this.x, this.y + _componentHeight, _componentWidth, 1);
+			var bgQuad:Quad = new Quad(_componentWidth, _images.length * 45, 0xE5E5E5);
+			bgQuad.y = _imageThumbsContainer.clipRect.y;
+			_imageThumbsContainer.addChild(bgQuad);
 			createThumbs();
 		}
 		

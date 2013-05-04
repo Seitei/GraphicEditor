@@ -13,7 +13,7 @@ package utils
 		[Embed(source = "../assets/arrow.png")]
 		private static const Arrow:Class;
 		
-		[Embed(source = "../assets/car_1.jpg")]
+		[Embed(source = "../assets/car_1.png")]
 		private static const Car1:Class;
 		
 		[Embed(source = "../assets/car_2.png")]
@@ -22,14 +22,33 @@ package utils
 		[Embed(source = "../assets/car_3.png")]
 		private static const Car3:Class;
 		
-		[Embed(source = "../assets/toy_1.jpg")]
+		[Embed(source = "../assets/car_4.png")]
+		private static const Car4:Class;
+		
+		[Embed(source = "../assets/toy_1.png")]
 		private static const Toy1:Class;
 		
-		[Embed(source = "../assets/toy_2.jpg")]
+		[Embed(source = "../assets/toy_2.png")]
 		private static const Toy2:Class;
 		
-		[Embed(source = "../assets/toy_3.jpg")]
+		[Embed(source = "../assets/toy_3.png")]
 		private static const Toy3:Class;
+		
+		[Embed(source = "../assets/toy_4.png")]
+		private static const Toy4:Class;
+		
+		[Embed(source = "../assets/fruit_1.png")]
+		private static const Fruit1:Class;
+		
+		[Embed(source = "../assets/fruit_2.png")]
+		private static const Fruit2:Class;
+		
+		[Embed(source = "../assets/fruit_3.png")]
+		private static const Fruit3:Class;
+		
+		[Embed(source = "../assets/fruit_4.png")]
+		private static const Fruit4:Class;
+		
 		
 		[Embed(source = "../assets/move_cursor.png")]
 		private static const MoveCursor:Class;
@@ -54,12 +73,22 @@ package utils
 		public function ResourceManager()
 		{
 			TextureAssets["arrow"] = Arrow;
+			
 			TextureAssets["car_1"] = Car1;
 			TextureAssets["car_2"] = Car2;
 			TextureAssets["car_3"] = Car3;
+			TextureAssets["car_4"] = Car4;
+			
 			TextureAssets["toy_1"] = Toy1;
 			TextureAssets["toy_2"] = Toy2;
 			TextureAssets["toy_3"] = Toy3;
+			TextureAssets["toy_4"] = Toy4;
+			
+			TextureAssets["fruit_1"] = Fruit1;
+			TextureAssets["fruit_2"] = Fruit2;
+			TextureAssets["fruit_3"] = Fruit3;
+			TextureAssets["fruit_4"] = Fruit4;
+			
 			TextureAssets["move_cursor"] = MoveCursor;
 			TextureAssets["image_preview_container"] = ImagePreviewContainer;
 				

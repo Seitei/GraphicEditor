@@ -107,6 +107,7 @@ package
 				topLine.width    += valueX;
 				bottomLine.width += valueX;
 				rightLine.x 	 += valueX;
+				return;
 			}
 			
 			if(anchor == "midLeft"){
@@ -115,6 +116,7 @@ package
 				bottomLine.width += valueX;
 				bottomLine.x     += valueX * _resizeDirectionX;
 				leftLine.x  	 += valueX * _resizeDirectionX;
+				return;
 			}
 			
 			if(anchor == "topMid"){
@@ -123,12 +125,14 @@ package
 				leftLine.y 		 += valueY * _resizeDirectionY;
 				rightLine.height -= valueY * _resizeDirectionY;
 				rightLine.y 	 += valueY * _resizeDirectionY;
+				return;
 			}
 			
 			if(anchor == "botMid"){
 				bottomLine.y     += valueY;
 				leftLine.height  += valueY * _resizeDirectionY;
 				rightLine.height += valueY * _resizeDirectionY;
+				return;
 			}
 			
 			if(anchor == "topRight"){
@@ -140,6 +144,7 @@ package
 				leftLine.y 		 += valueY * _resizeDirectionY;
 				rightLine.height -= valueY * _resizeDirectionY;
 				rightLine.y 	 += valueY * _resizeDirectionY;
+				return;
 			}
 			
 			if(anchor == "topLeft"){
@@ -153,6 +158,7 @@ package
 				leftLine.y 		 += valueY * _resizeDirectionY;
 				rightLine.height -= valueY * _resizeDirectionY;
 				rightLine.y 	 += valueY * _resizeDirectionY;
+				return;
 			}
 			
 			if(anchor == "botLeft"){
@@ -164,6 +170,7 @@ package
 				bottomLine.y     += valueY;
 				leftLine.height  += valueY * _resizeDirectionY;
 				rightLine.height += valueY * _resizeDirectionY;
+				return;
 			}
 			
 			if(anchor == "botRight"){
@@ -173,6 +180,7 @@ package
 				topLine.width    += valueX;
 				bottomLine.width += valueX;
 				rightLine.x 	 += valueX;
+				return;
 			}
 			
 			if(anchor == ""){
@@ -240,16 +248,16 @@ package
 		private function setupAnchorPoints():void {
 			
 			_anchorsArray = new Array();
-			
-			_anchorsArray[1] = _topLeftAnchor = new Quad(10, 10, 0x0000ff);  _topLeftAnchor.name = "topLeft";
-			_anchorsArray[2] = _topMidAnchor = new Quad(10, 10, 0x0000ff);   _topMidAnchor.name = "topMid";
-			_anchorsArray[3] = _topRightAnchor = new Quad(10, 10, 0x0000ff); _topRightAnchor.name = "topRight";
-			_anchorsArray[4] = _midLeftAnchor = new Quad(10, 10, 0x0000ff);  _midLeftAnchor.name = "midLeft";
-			_anchorsArray[6] = _midRightAnchor = new Quad(10, 10, 0x0000ff); _midRightAnchor.name = "midRight";
-			_anchorsArray[7] = _botLeftAnchor = new Quad(10, 10, 0x0000ff);  _botLeftAnchor.name = "botLeft";
-			_anchorsArray[8] = _botMidAnchor = new Quad(10, 10, 0x0000ff);   _botMidAnchor.name = "botMid";
-			_anchorsArray[9] = _botRightAnchor = new Quad(10, 10, 0x0000ff); _botRightAnchor.name = "botRight";
-			_rotationAnchor = new Quad(10, 10, Color.AQUA);
+			var anchorSize:int = 7;
+			_anchorsArray[1] = _topLeftAnchor = new Quad(anchorSize, anchorSize, 0x0000ff);  _topLeftAnchor.name = "topLeft";
+			_anchorsArray[2] = _topMidAnchor = new Quad(anchorSize, anchorSize, 0x0000ff);   _topMidAnchor.name = "topMid";
+			_anchorsArray[3] = _topRightAnchor = new Quad(anchorSize, anchorSize, 0x0000ff); _topRightAnchor.name = "topRight";
+			_anchorsArray[4] = _midLeftAnchor = new Quad(anchorSize, anchorSize, 0x0000ff);  _midLeftAnchor.name = "midLeft";
+			_anchorsArray[6] = _midRightAnchor = new Quad(anchorSize, anchorSize, 0x0000ff); _midRightAnchor.name = "midRight";
+			_anchorsArray[7] = _botLeftAnchor = new Quad(anchorSize, anchorSize, 0x0000ff);  _botLeftAnchor.name = "botLeft";
+			_anchorsArray[8] = _botMidAnchor = new Quad(anchorSize, anchorSize, 0x0000ff);   _botMidAnchor.name = "botMid";
+			_anchorsArray[9] = _botRightAnchor = new Quad(anchorSize, anchorSize, 0x0000ff); _botRightAnchor.name = "botRight";
+			_rotationAnchor = new Quad(6, 6, Color.AQUA);
 			
 			var xCounter:Number = 0;
 			var yCounter:Number = 0;
@@ -378,7 +386,9 @@ package
 			if(hoverTouch){
 				CustomMouse.setMouse("resize_horizontal");
 			}
-			
+			if(!hoverTouch && !beganTouch && !moveTouch){
+				CustomMouse.setAuto();
+			}
 			if(beganTouch){
 				
 				_finalWidth = 0;
@@ -398,6 +408,10 @@ package
 				
 				/*transformedMovementX = movementX * Math.cos(_image.rotation); 
 				transformedMovementY = movementY * Math.sin(_image.rotation);*/
+				
+				if(_image.width + _finalWidth + (movementX * _resizeDirectionX) <= 20)
+					return;
+					
 				
 				_finalWidth += movementX * _resizeDirectionX;
 				
@@ -420,7 +434,6 @@ package
 			}
 			
 			if(endedTouch){
-				CustomMouse.setAuto();
 				_image.width += _finalWidth;
 				_image.x += (_finalWidth / 2) * _resizeDirectionX;
 			}
@@ -439,9 +452,12 @@ package
 			if(hoverTouch){
 				CustomMouse.setMouse("resize_vertical");
 			}
-			
+			if(!hoverTouch && !beganTouch && !moveTouch){
+				CustomMouse.setAuto();
+			}
 			//configure the new pivot and position
 			if(beganTouch){
+				
 				_finalHeight = 0;
 				if(anchor.name != _previousAnchor || _previousAnchor == ""){
 					if(anchor.name == "topMid"){
@@ -460,6 +476,9 @@ package
 				
 				var movementX:Number = moveTouch.getMovement(this.parent).y;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
+				
+				if(_image.height + _finalHeight + (movementY * _resizeDirectionY) <= 20 ) 
+					return;
 				
 				_finalHeight += movementY * _resizeDirectionY;
 				
@@ -481,7 +500,6 @@ package
 			}
 			
 			if(endedTouch){
-				CustomMouse.setAuto();
 				_image.height += _finalHeight;
 				_image.y += (_finalHeight / 2) * _resizeDirectionY;
 			}
@@ -507,6 +525,9 @@ package
 					CustomMouse.setMouse("resize_topleft");
 				if(anchor.name == "topRight" || anchor.name == "botLeft")
 					CustomMouse.setMouse("resize_topright");
+			}
+			if(!hoverTouch && !beganTouch && !moveTouch){
+				CustomMouse.setAuto();
 			}
 			
 			//configure the new pivot and position
@@ -544,6 +565,12 @@ package
 				
 				var movementX:Number = moveTouch.getMovement(this.parent).x;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
+				
+				if(_image.width + _finalWidth + (movementX * _resizeDirectionX) <= 20) 
+					movementX = 0;
+				
+				if(_image.height + _finalHeight + (movementY * _resizeDirectionY) <= 20)
+					movementY = 0;
 				
 				_finalWidth += movementX * _resizeDirectionX;
 				_finalHeight += movementY * _resizeDirectionY;
@@ -592,7 +619,6 @@ package
 			}
 			
 			if(endedTouch){
-				CustomMouse.setAuto();
 				_image.width += _finalWidth;
 				_image.height += _finalHeight;
 				_image.x += (_finalWidth / 2) * _resizeDirectionX;
