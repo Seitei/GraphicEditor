@@ -175,8 +175,6 @@ package
 				rightLine.x 	 += valueX;
 			}
 			
-			
-			
 			if(anchor == ""){
 				topLine.width    = _image.width;
 				bottomLine.width = _image.width;
@@ -185,14 +183,6 @@ package
 				rightLine.x 	 = _image.width; - 1;
 				leftLine.height  = _image.height;
 			}
-			
-			
-			
-			
-			
-			
-			
-			
 			
 			topLine.color = rightLine.color = bottomLine.color = leftLine.color = Color.BLUE;
 		}

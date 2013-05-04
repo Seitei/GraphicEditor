@@ -14,8 +14,10 @@ package
 	import starling.events.TouchPhase;
 	import starling.extensions.ClippedSprite;
 	import starling.text.TextField;
+	import starling.utils.Color;
 	import starling.utils.HAlign;
 	
+	import utils.Border;
 	import utils.ExtendedButton;
 	import utils.ResourceManager;
 	
@@ -34,7 +36,7 @@ package
 		private var _actionButtons:Array; 
 		private var _arrow:Image;
 		private var _imageThumbsContainer:ClippedSprite;
-		private var _imageThumbs:Vector.<Image>;
+		private var _imageThumbs:Array;
 		private var _imagePreviewContainer:Sprite;
 		private var _componentWidth:int;
 		private var _componentHeight:int;
@@ -42,6 +44,7 @@ package
 		private var _previewImageSlot:Sprite;
 		private var _status:String;
 		private var _description:String;
+		private var _hoverQuad:Quad;
 		
 		public function DropDownContainer(description:String, actionButtons:Vector.<ExtendedButton> = null)
 		{
@@ -52,10 +55,16 @@ package
 			quad.useHandCursor = true;
 			quad.addEventListener(TouchEvent.TOUCH, onComponentTouched);
 			
+			_hoverQuad = new Quad(quad.width, quad.height, 0xffffff);
+			_hoverQuad.alpha = 0.2;
+			addChild(_hoverQuad);
+			_hoverQuad.visible = false;
+			_hoverQuad.touchable = false;
+			
 			_componentHeight = this.height;
 			_componentWidth = this.width;
 			
-			_imageThumbs = new Vector.<Image>;
+			_imageThumbs = new Array();
 			
 			_imagePreviewContainer = new Sprite();
 			var image:Image = new Image(ResourceManager.getInstance().getTexture("image_preview_container"));
@@ -77,9 +86,9 @@ package
 			
 			_descriptionTxt = new TextField(100, 25, description);
 			_descriptionTxt.pivotY = _descriptionTxt.height / 2;
+			_descriptionTxt.touchable = false;
 			
 			setDirection(_direction);
-			
 		}
 		
 		public function getContentHeight():int {
@@ -110,9 +119,6 @@ package
 			var aTween:Tween = new Tween(_arrow, 0.2, Transitions.LINEAR);
 			aTween.animate("rotation", Math.PI / 2);
 			Starling.juggler.add(aTween);
-			
-			
-			
 		}
 		
 		public function get description():String
@@ -132,9 +138,12 @@ package
 		
 		private function onComponentTouched(e:TouchEvent):void {
 			
-			var touch:Touch = e.touches[0];
+			var quad:Quad = Quad(e.currentTarget);
+			var beganTouch:Touch = e.getTouch(quad, TouchPhase.BEGAN);
+			var hoverTouch:Touch = e.getTouch(quad, TouchPhase.HOVER);
+			//var moveTouch:Touch = e.getTouch(quad, TouchPhase.MOVED); 
 			
-			if(touch.phase == TouchPhase.BEGAN){
+			if(beganTouch){
 				if(_status == COLLAPSED){
 					dispatchEventWith("expand", true, this);
 					_status = EXPANDED;						
@@ -144,6 +153,14 @@ package
 					_status = COLLAPSED;
 				}
 			}
+			
+			if(hoverTouch){
+				_hoverQuad.visible = true;
+			}
+			else{
+				_hoverQuad.visible = false;
+			}
+			
 		}
 		
 		//here we set the initial amount of images that the component will comprehend
@@ -166,17 +183,19 @@ package
 					row ++;
 				}
 				
+				var thumbContainer:Sprite = new Sprite();
 				var image:Image = new Image(_images[i].texture);
 				image.width = 45;
 				image.height = 45;
 				image.name = _images[i].name;
-				
+				thumbContainer.addChild(image);
+				image.useHandCursor = true;
 				image.addEventListener(TouchEvent.TOUCH, onImageTouch);
 					
-				image.x = counter * 45;
-				image.y = row * 45 + _componentHeight;
+				thumbContainer.x = counter * 45;
+				thumbContainer.y = row * 45 + _componentHeight;
 				
-				_imageThumbs.push(image);
+				_imageThumbs.push(thumbContainer);
 				
 				_imageThumbsContainer.addChild(_imageThumbs[i]);
 				
@@ -193,10 +212,13 @@ package
 			if(hoverTouch && !_previewing){
 				
 				_previewing = true;
+				
+				Border.createBorder(image.width, image.height, Color.BLACK, 1, Sprite(image.parent));
+				
 				_previewImageSlot.removeChildren();
 				addChild(_imagePreviewContainer);
 				_imagePreviewContainer.x = _componentWidth + 5;
-				_imagePreviewContainer.y = image.y + image.height / 2;
+				_imagePreviewContainer.y = image.parent.y + image.height / 2;
 				
 				var previewImage:Image = getImageByName(image.name);
 				previewImage.x = _imagePreviewContainer.width / 2;
@@ -208,6 +230,7 @@ package
 			
 			if(!hoverTouch) {
 				_previewing = false;
+				image.parent.removeChildren(1, -1, true);
 				removeChild(_imagePreviewContainer);
 			}
 			
