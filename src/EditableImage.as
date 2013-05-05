@@ -80,6 +80,16 @@ package
 			select(true);
 		}
 		
+		public function get selected():Boolean
+		{
+			return _selected;
+		}
+
+		public function set selected(value:Boolean):void
+		{
+			_selected = value;
+		}
+
 		public function createBorder():void
 		{
 			_finalWidth = 0;
@@ -212,7 +222,7 @@ package
 			var beganTouch:Touch = e.getTouch(image, TouchPhase.BEGAN);
 			var hoverTouch:Touch = e.getTouch(image, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(image, TouchPhase.MOVED);
-			
+			e.stopPropagation();
 			if(hoverTouch){
 				CustomMouse.setMouse("move_cursor");
 				_border.visible = true;
@@ -239,10 +249,14 @@ package
 			if(value){
 				_border.visible = true;				
 				_imageUI.visible = true;
+				dispatchEventWith("imageSelected", true, this);
 			}
 			else{
 				_imageUI.visible = false;
+				_border.visible = false;	
 			}
+			
+			
 		}
 		
 		private function setupAnchorPoints():void {

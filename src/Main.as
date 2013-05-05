@@ -7,6 +7,9 @@ package
 	import starling.display.Sprite;
 	import starling.events.Event;
 	import starling.events.KeyboardEvent;
+	import starling.events.Touch;
+	import starling.events.TouchEvent;
+	import starling.events.TouchPhase;
 	import starling.utils.Color;
 	
 	import utils.Border;
@@ -18,10 +21,12 @@ package
 		private var _libraryContainer:ScrollContainer;
 		private var _layersContainer:ScrollContainer;
 		private var _board:Sprite;
+		private var _images:Vector.<EditableImage>;
 		
 		public function Main() 
 		{
 			addEventListener(Event.ADDED_TO_STAGE, onAdded);
+			_images = new Vector.<EditableImage>;
 		}
 		
 		private function onAdded(e:Event):void {
@@ -46,19 +51,40 @@ package
 			Border.createBorder(_board.width, _board.height, Color.BLACK, 1, _board);
 			_board.x = _libraryContainer.width + 20;
 			_board.y = 20;
-			
+			_board.addEventListener(TouchEvent.TOUCH, onBoardTouched);
 			addChildAt(_board, 0);
 			
 			addEventListener("addImage", onAddImage);
 			addEventListener("deleteImage", onDeleteImage);
+			addEventListener("imageSelected", onImageSelected);
 			initLibrary();
-				
 		}
 		
-		private function onDeleteImage(e:Event, image:EditableImage):void {
-			_board.removeChild(image);
+		private function onImageSelected(e:Event, image:EditableImage):void {
+			deSelectImages(image);	
 		}
 		
+		private function onBoardTouched(e:TouchEvent):void {
+			var touch:Touch = e.touches[0];
+			if(touch.phase == TouchPhase.BEGAN)
+				deSelectImages();	
+		}
+		
+		
+		
+		private function onDeleteImage(e:Event):void {
+			for(var i:int = 0; i < _images.length; i++){
+				if(_images[i].selected)
+					_board.removeChild(_images[i], true);		
+			}
+		}
+		
+		public function deSelectImages(image:EditableImage = null):void {
+			for(var i:int = 0; i < _images.length; i++){
+				if(image != _images[i])
+					_images[i].select(false);		
+			}
+		}
 		
 		private function onAddImage(e:Event, image:Image):void {
 			
@@ -70,7 +96,9 @@ package
 			edImage.x = _board.width / 2;
 			edImage.y = _board.height / 2;
 			
+			_images.push(edImage);
 			_board.addChild(edImage);
+			deSelectImages(edImage);
 		}
 		
 		private function initLibrary():void {
