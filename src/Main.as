@@ -112,7 +112,20 @@ package
 			//Fruits
 			createCategory("Fruits", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]);
 			
+			//Fruits2
+			createCategory("Fruits2", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]);
 			
+			//Fruits3
+			createCategory("Fruits3", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]);
+			
+			//Cars2
+			createCategory("Cars2", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
+			
+			//Cars3
+			createCategory("Cars3", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
+			
+			//Cars4
+			createCategory("Cars4", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
 			
 		}
 		

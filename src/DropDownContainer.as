@@ -46,6 +46,7 @@ package
 		private var _status:String;
 		private var _description:String;
 		private var _hoverQuad:Quad;
+		private var _blocked:Boolean;
 		
 		[Embed(source='../assets/fonts/HelveticaNeueLTCom-Roman.ttf', fontFamily="Helvetica", mimeType="application/x-font", fontWeight="normal", fontStyle="normal", advancedAntiAliasing="true", embedAsCFF="false")] 
 		private static var HelveticaFont:Class;
@@ -68,8 +69,8 @@ package
 			_hoverQuad.visible = false;
 			_hoverQuad.touchable = false;
 			
-			var darkLine:Quad = new Quad(this.width, 1, 0x000000); darkLine.alpha = 0.2; darkLine.y = this.height - 1; addChild(darkLine);
-			var lightLine:Quad = new Quad(this.width, 1, 0xffffff); lightLine.alpha = 0.1; lightLine.y = this.height; addChild(lightLine);
+			var darkLine:Quad = new Quad(this.width, 1, 0x000000); darkLine.alpha = 0.2; darkLine.y = this.height - 2; addChild(darkLine);
+			var lightLine:Quad = new Quad(this.width, 1, 0xffffff); lightLine.alpha = 0.1; lightLine.y = this.height - 1; addChild(lightLine);
 			
 			_componentHeight = this.height;
 			_componentWidth = this.width;
@@ -101,15 +102,26 @@ package
 			_descriptionTxt.touchable = false;
 			
 			setDirection(_direction);
+			
 		}
 		
+		public function get blocked():Boolean
+		{
+			return _blocked;
+		}
+
+		public function set blocked(value:Boolean):void
+		{
+			_blocked = value;
+		}
+
 		public function get status():String
 		{
 			return _status;
 		}
 
 		public function getContentHeight():int {
-			return Math.ceil(_images.length / 4) * 45 + 1;
+			return Math.ceil(_images.length / 4) * 45;
 		}
 		
 		//we dispatch an event when we click the body of the component
@@ -138,7 +150,8 @@ package
 				_status = EXPANDED;
 			else
 				_status = COLLAPSED;
-			dispatchEventWith("blockElements", true);
+			
+			dispatchEventWith("blockElements", true, false);
 		}
 		
 		public function get description():String
@@ -161,18 +174,15 @@ package
 			var quad:Quad = Quad(e.currentTarget);
 			var beganTouch:Touch = e.getTouch(quad, TouchPhase.BEGAN);
 			var hoverTouch:Touch = e.getTouch(quad, TouchPhase.HOVER);
-			//var moveTouch:Touch = e.getTouch(quad, TouchPhase.MOVED); 
 			
-			if(beganTouch){
-				if(_status == COLLAPSED){
-					expandOrCollapse();
-					dispatchEventWith("collapseOrExpand", true, this);
-				}
-				else{
-					expandOrCollapse();
-					dispatchEventWith("collapseOrExpand", true, this);
-				}
+			if(beganTouch && !_blocked){
+				_blocked = true;
+				expandOrCollapse();
+				dispatchEventWith("collapseOrExpand", true, this);
+				dispatchEventWith("blockElements", true, true);
 			}
+			
+			
 			
 			if(hoverTouch){
 				_hoverQuad.visible = true;
@@ -187,12 +197,20 @@ package
 		public function setContent(images:Vector.<Image>):void {
 			_images = images;
 			_imageThumbsContainer.clipRect = new Rectangle(this.x, this.y + _componentHeight, _componentWidth, 1);
-			var bgQuad:Quad = new Quad(_componentWidth, _images.length * 45, 0xE5E5E5);
+			var bgQuad:Quad = new Quad(_componentWidth, getContentHeight(), 0xE5E5E5);
 			bgQuad.y = _imageThumbsContainer.clipRect.y;
 			_imageThumbsContainer.addChild(bgQuad);
 			createThumbs();
 		}
 		
+		//the current height of the component
+		public function getCurrentHeight():Number {
+			if(_status == COLLAPSED) return	_componentHeight;
+			else return _componentHeight + getContentHeight();
+		}
+			
+		
+			
 		//4 thumbs per row
 		private function createThumbs():void {
 			
@@ -270,7 +288,6 @@ package
 		private function getImageByName(name:String):Image {
 			
 			for(var i:int; i < _images.length; i ++){
-				//trace(_images[i].name);
 				if(_images[i].name == name)
 					return _images[i];
 				

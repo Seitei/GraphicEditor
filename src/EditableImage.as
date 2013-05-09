@@ -54,6 +54,9 @@ package
 		private var _border:Sprite;
 		private var _finalWidth:Number;
 		private var _finalHeight:Number;
+		private var _resized:Boolean;
+		private var _previousWidth:Number;
+		private var _previousHeight:Number;
 		
 		public function EditableImage(image:Image)
 		{
@@ -74,6 +77,8 @@ package
 			addChild(_imageUI);
 			_originalWidth = _image.width;
 			_originalHeight = _image.height;
+			_previousWidth = _originalWidth;
+			_previousHeight = _originalHeight;
 			_rotationVector = new Point();
 			createBorder();
 			addEventListener(Event.ADDED_TO_STAGE, onAdded);
@@ -97,7 +102,7 @@ package
 			_border = new Sprite();
 			_border.touchable = false;
 			//_border.visible = false;
-			addChild(_border);
+			_imageUI.addChild(_border);
 				
 			for (var i:int=0; i<4; ++i)
 				_border.addChild(new Quad(1.0, 1.0));
@@ -223,6 +228,7 @@ package
 			var hoverTouch:Touch = e.getTouch(image, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(image, TouchPhase.MOVED);
 			e.stopPropagation();
+			
 			if(hoverTouch){
 				CustomMouse.setMouse("move_cursor");
 				_border.visible = true;
@@ -296,17 +302,17 @@ package
 				}
 			}
 			
-			/*_rotationAnchor.pivotX = _rotationAnchor.width / 2;
+			_rotationAnchor.pivotX = _rotationAnchor.width / 2;
 			_rotationAnchor.pivotY = _rotationAnchor.height / 2;
 			
 			_rotationAnchor.x = _topMidAnchor.x;
 			_rotationAnchor.y = _topMidAnchor.y - 15;
 			
-			_imageUI.addChild(_rotationAnchor);*/
-			/*_imageUI.pivotX = _originalWidth / 2;
+			_imageUI.addChild(_rotationAnchor);
+			_imageUI.pivotX = _originalWidth / 2;
 			_imageUI.pivotY = _originalHeight / 2;
 			_imageUI.x = _imageUI.pivotX
-			_imageUI.y = _imageUI.pivotY*/
+			_imageUI.y = _imageUI.pivotY
 			
 			_topLeftAnchor.addEventListener(TouchEvent.TOUCH, diagonalResize);
 			_topMidAnchor.addEventListener(TouchEvent.TOUCH, verticalResize);
@@ -316,10 +322,11 @@ package
 			_botLeftAnchor.addEventListener(TouchEvent.TOUCH, diagonalResize);
 			_botMidAnchor.addEventListener(TouchEvent.TOUCH, verticalResize);
 			_botRightAnchor.addEventListener(TouchEvent.TOUCH, diagonalResize);
-			//_rotationAnchor.addEventListener(TouchEvent.TOUCH, rotate);
+			
+			_rotationAnchor.addEventListener(TouchEvent.TOUCH, rotate);
 			//we need to recalculate the pivot since we are altering the image.
-			/*this.pivotX = this.width / 2;
-			this.pivotY = this.height / 2;*/
+			this.pivotX = this.width / 2;
+			this.pivotY = this.height / 2;
 		}
 		
 		private function rotate(e:TouchEvent):void {
@@ -330,33 +337,25 @@ package
 			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
 			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
+			e.stopPropagation();
 			
 			if(beganTouch){
-				
-				var quad1:Quad = new Quad(5, 5, Color.BLUE);
-				quad1.x = _image.pivotX;
-				quad1.y = _image.pivotY;
-				addChild(quad1);
-				
-				if(_image.pivotX == 0){
-					_image.x += _image.width / 2;
-					_image.y += _image.height / 2;
-					_image.pivotX = _originalWidth / 2;
-					_image.pivotY = _originalHeight / 2;
 					
-					_imageUI.pivotX = _originalWidth / 2;
-					_imageUI.pivotY = _originalHeight / 2;
-					_imageUI.x = _imageUI.pivotX
-					_imageUI.y = _imageUI.pivotY
-				}
+				var prevX:Number = _image.x;
+				var prevY:Number = _image.y;
 				
-				if(_image.pivotX == 100){
-					_image.x -= _image.width / 2;
-					_image.y += _image.height / 2;
-					_image.pivotX = _originalWidth / 2;
-					_image.pivotY = _originalHeight / 2;
-				}
-				
+				_image.x = 50;
+				_image.y = 50;
+					
+				var valueX:Number = prevX - 50;
+				var valueY:Number = prevY - 50;
+					
+				this.x += valueX * Math.cos(this.rotation) - valueY * Math.sin(this.rotation); 
+				this.y += valueX * Math.sin(this.rotation) + valueY * Math.cos(this.rotation);
+					
+				_imageUI.x -= valueX;
+				_imageUI.y -= valueY;
+					
 				
 			}
 			
@@ -365,15 +364,16 @@ package
 				var xCoord:Number = moveTouch.getLocation(this.parent).x;
 				var yCoord:Number = moveTouch.getLocation(this.parent).y;
 				
+				
 				_rotationVector.x = xCoord;
 				_rotationVector.y = yCoord;
 				
-				var diff:Point = _rotationVector.subtract(new Point(this.x + (_image.width - _originalWidth) / 2, 
-																	this.y + (_image.height - _originalHeight) / 2)); 
+				var diff:Point = _rotationVector.subtract(new Point(this.x, this.y)); 
 				
-				_image.rotation = Math.atan2(diff.y, diff.x) + PI / 2;
+				this.rotation = Math.atan2(diff.y, diff.x) + PI / 2;
 				
-				_imageUI.rotation = _image.rotation;
+				
+				//_imageUI.rotation = _image.rotation;
 				/*for(var i:int = 1; i <= 9; i++){
 					if(i != 5){
 						_anchorsArray[i].rotation = -this.rotation;
@@ -395,6 +395,7 @@ package
 			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
 			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
+			e.stopPropagation();
 			
 			//change the mouse appereance
 			if(hoverTouch){
@@ -417,15 +418,23 @@ package
 			//resize
 			if(moveTouch){
 				
+				if(!_resized){
+					_previousWidth = _image.width;
+					_previousHeight = _image.height;
+					_resized = true;
+				}
+				
 				var movementX:Number = moveTouch.getMovement(this.parent).x;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
 				
-				/*transformedMovementX = movementX * Math.cos(_image.rotation); 
-				transformedMovementY = movementY * Math.sin(_image.rotation);*/
+				if(this.rotation != 0){
+					var transformedMovementX:Number = movementX * Math.cos(this.rotation); 
+					var transformedMovementY:Number = movementY * Math.sin(this.rotation);
+					movementX = transformedMovementX + transformedMovementY;
+				}
 				
 				if(_image.width + _finalWidth + (movementX * _resizeDirectionX) <= 20)
 					return;
-					
 				
 				_finalWidth += movementX * _resizeDirectionX;
 				
@@ -461,6 +470,7 @@ package
 			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
 			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
+			e.stopPropagation();
 			
 			//change the mouse appereance
 			if(hoverTouch){
@@ -488,8 +498,14 @@ package
 			//resize
 			if(moveTouch){
 				
-				var movementX:Number = moveTouch.getMovement(this.parent).y;
+				var movementX:Number = moveTouch.getMovement(this.parent).x;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
+				
+				if(this.rotation != 0){
+					var transformedMovementX:Number = -movementX * Math.sin(this.rotation); 
+					var transformedMovementY:Number = movementY * Math.cos(this.rotation);
+					movementY = transformedMovementX + transformedMovementY;
+				}
 				
 				if(_image.height + _finalHeight + (movementY * _resizeDirectionY) <= 20 ) 
 					return;
@@ -502,6 +518,7 @@ package
 					_topLeftAnchor.y += movementY;
 					_topMidAnchor.y += movementY;
 					_topRightAnchor.y += movementY;
+					_rotationAnchor.y += movementY;
 				}
 				else {
 					_botLeftAnchor.y += movementY;
@@ -532,6 +549,7 @@ package
 			var hoverTouch:Touch = e.getTouch(anchor, TouchPhase.HOVER);
 			var moveTouch:Touch = e.getTouch(anchor, TouchPhase.MOVED);
 			var endedTouch:Touch = e.getTouch(anchor, TouchPhase.ENDED);
+			e.stopPropagation();
 			
 			//change the mouse appereance
 			if(hoverTouch){
@@ -577,8 +595,17 @@ package
 			//resize
 			if(moveTouch){
 				
+				
 				var movementX:Number = moveTouch.getMovement(this.parent).x;
 				var movementY:Number = moveTouch.getMovement(this.parent).y;
+				
+				if(this.rotation != 0){
+					var transformedMovementX:Number = movementX * Math.cos(this.rotation); 
+					var transformedMovementY:Number = movementY * Math.sin(this.rotation);
+					movementY =  movementY * Math.cos(this.rotation) - movementX * Math.sin(this.rotation);
+					movementX = transformedMovementX + transformedMovementY;
+				}
+				
 				
 				if(_image.width + _finalWidth + (movementX * _resizeDirectionX) <= 20) 
 					movementX = 0;
@@ -599,6 +626,9 @@ package
 					_botMidAnchor.x += movementX / 2;
 					_topRightAnchor.y += movementY;
 					_midRightAnchor.y += movementY / 2;
+					
+					_rotationAnchor.y += movementY;
+					_rotationAnchor.x += movementX / 2;
 				}
 				
 				if(anchor.name == "topRight"){ 
@@ -609,6 +639,9 @@ package
 					_botMidAnchor.x += movementX / 2;
 					_botRightAnchor.x += movementX;
 					_midRightAnchor.x += movementX; _midRightAnchor.y += movementY / 2;
+					
+					_rotationAnchor.y += movementY;
+					_rotationAnchor.x += movementX / 2;
 				}
 				
 				if(anchor.name == "botLeft"){ 
@@ -619,6 +652,8 @@ package
 					_botLeftAnchor.y += movementY; _botLeftAnchor.x += movementX;
 					_botRightAnchor.y += movementY;
 					_midRightAnchor.y += movementY / 2;
+					
+					_rotationAnchor.x += movementX / 2;
 				}
 				
 				if(anchor.name == "botRight"){ 
@@ -629,6 +664,8 @@ package
 					_botMidAnchor.x += movementX / 2; _botMidAnchor.y += movementY;
 					_botRightAnchor.y += movementY; _botRightAnchor.x += movementX;
 					_botLeftAnchor.y += movementY;
+					
+					_rotationAnchor.x += movementX / 2;
 				}
 			}
 			

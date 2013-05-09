@@ -12,7 +12,10 @@ package
 	import starling.events.Touch;
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
+	import starling.text.TextField;
 	import starling.utils.Color;
+	
+	import utils.ResourceManager;
 	
 	public class Test extends Sprite
 	{
@@ -32,17 +35,37 @@ package
 		private function onAdded(e:Event):void {
 			
 			
-			var quad:Quad = new Quad(100, 100)
+			var quad:Quad = new Quad(100, 100);
+			
 			quad.x = stage.stageWidth / 2;
 			quad.y = stage.stageHeight / 2;
-			addChild(quad);
-			var matrix:Matrix = new Matrix();
-			matrix.translate(100, 100);
-			//matrix.translate(-quad.width / 2, quad.height / 2);
-			/*matrix.rotate(3.14159);
-			matrix.translate(100, 100);*/
 			
-			quad.transformationMatrix = matrix;
+			var quad2:Quad = new Quad(100, 100, Color.RED);
+			
+			quad2.x = stage.stageWidth / 2;
+			quad2.y = stage.stageHeight / 2;
+			
+			addChild(quad2);
+			
+			var tm:Matrix = quad.transformationMatrix;
+			
+			var point:Point = new Point(50, 50);
+			
+			point = tm.transformPoint(point);
+			
+			tm.translate( -point.x, -point.y); 
+			
+			tm.rotate(45 * (Math.PI / 180));
+			
+			tm.translate(point.x, point.y); 
+			
+			quad.transformationMatrix = tm;
+			
+			addChild(quad);
+			
+			
+			
+			
 		}
 		
 		
