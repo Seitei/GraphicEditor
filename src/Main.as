@@ -103,49 +103,49 @@ package
 		
 		private function initLibrary():void {
 			
+			var data:Array = new Array();
 			//Cars
-			createCategory("Cars", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
+			data.push(["Cars", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4",
+								"car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]]);
 			
 			//Toys
-			createCategory("Toys", ["toy_1", "toy_2", "toy_3", "toy_2", "toy_4", "toy_1", "toy_2", "toy_4", "toy_3", "toy_2", "toy_4"]);
+			data.push(["Toys", ["toy_1", "toy_2", "toy_3", "toy_2", "toy_4", "toy_1", "toy_2", "toy_4", "toy_3", "toy_2", "toy_4", 
+								"toy_1", "toy_2", "toy_3", "toy_2", "toy_4", "toy_1", "toy_2", "toy_4", "toy_3", "toy_2", "toy_4"]]);
 			
 			//Fruits
-			createCategory("Fruits", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]);
+			data.push(["Fruits", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4",
+								  "fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]]);
 			
-			//Fruits2
-			createCategory("Fruits2", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]);
 			
-			//Fruits3
-			createCategory("Fruits3", ["fruit_1", "fruit_2", "fruit_3", "fruit_2", "fruit_4", "fruit_1", "fruit_2", "fruit_4", "fruit_3", "fruit_2", "fruit_4"]);
-			
-			//Cars2
-			createCategory("Cars2", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
-			
-			//Cars3
-			createCategory("Cars3", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
-			
-			//Cars4
-			createCategory("Cars4", ["car_1", "car_2", "car_3", "car_2", "car_4", "car_1", "car_2", "car_4", "car_3", "car_2", "car_4"]);
-			
+			createCategory(data);
+		
 		}
 		
-		private function createCategory(title:String, imageNames:Array):void {
+		private function createCategory(data:Array):void {
 			
-			var images:Vector.<Image>;
-			images = new Vector.<Image>;
+			var elements:Array = new Array();
 			
-			for(var i:int = 0; i < imageNames.length; i++){
+			for(var i:int = 0; i < data.length; i++){
 				
-				var image:Image = new Image(ResourceManager.getInstance().getTexture(imageNames[i]));
-				image.name = imageNames[i];
-				image.pivotX = image.width / 2; image.pivotY = image.height / 2;
-				images.push(image);
+				var images:Vector.<Image>;
+				images = new Vector.<Image>;
+				
+				var ddc:DropDownContainer = new DropDownContainer(data[i][0]);
+				
+				for(var j:int = 1; j < data[i][1].length; j++){
+					var image:Image = new Image(ResourceManager.getInstance().getTexture(data[i][1][j]));
+					image.name = data[i][1][j];
+					image.pivotX = image.width / 2; image.pivotY = image.height / 2;
+					images.push(image);
+				}
+				
+				ddc.setContent(images);
+				
+				elements.push(ddc);
 				
 			}
 			
-			var ddc:DropDownContainer = new DropDownContainer(title);
-			ddc.setContent(images);
-			_libraryContainer.addElement(ddc);
+			_libraryContainer.addElements(elements);
 			
 		}
 		

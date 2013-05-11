@@ -39,8 +39,8 @@ package
 		private var _imageThumbsContainer:ClippedSprite;
 		private var _imageThumbs:Array;
 		private var _imagePreviewContainer:Sprite;
-		private var _componentWidth:int;
-		private var _componentHeight:int;
+		private var _componentWidth:Number;
+		private var _componentHeight:Number;
 		private var _previewing:Boolean;
 		private var _previewImageSlot:Sprite;
 		private var _status:String;
@@ -58,6 +58,12 @@ package
 		{
 			_status = COLLAPSED;
 			_description = description;		
+			
+			//here we add the images
+			_imageThumbsContainer = new ClippedSprite();
+			addChild(_imageThumbsContainer);
+			
+			//component background
 			var componentQuad:Quad = new Quad(180, 25, 0x494949);
 			addChild(componentQuad);
 			componentQuad.useHandCursor = true;
@@ -69,6 +75,7 @@ package
 			_hoverQuad.visible = false;
 			_hoverQuad.touchable = false;
 			
+			//decorative lines
 			var darkLine:Quad = new Quad(this.width, 1, 0x000000); darkLine.alpha = 0.2; darkLine.y = this.height - 2; addChild(darkLine);
 			var lightLine:Quad = new Quad(this.width, 1, 0xffffff); lightLine.alpha = 0.1; lightLine.y = this.height - 1; addChild(lightLine);
 			
@@ -90,10 +97,6 @@ package
 			
 			_actionsSection = new Sprite();
 			_actionButtons = new Array();
-			
-			//here we add the images
-			_imageThumbsContainer = new ClippedSprite();
-			addChild(_imageThumbsContainer);
 			
 			_descriptionTxt = new TextField(100, 25, description, "Helvetica", 12);
 			_descriptionTxt.color = 0xD0D2D3;
@@ -120,13 +123,13 @@ package
 			return _status;
 		}
 
-		public function getContentHeight():int {
+		public function getContentHeight():Number {
 			return Math.ceil(_images.length / 4) * 45;
 		}
 		
 		//we dispatch an event when we click the body of the component
 
-		public function get componentHeight():int {
+		public function get componentHeight():Number {
 			return _componentHeight;
 		}
 
@@ -134,7 +137,10 @@ package
 			//thumbs
 			var tTween:Tween = new Tween(_imageThumbsContainer.clipRect, 0.5, Transitions.EASE_IN_OUT);
 			if(_status == EXPANDED) tTween.animate("height", 1);
-			if(_status == COLLAPSED) tTween.animate("height", Math.ceil(_images.length / 4) * 45 + 1);
+			if(_status == COLLAPSED) {
+				_imageThumbsContainer.visible = true;
+				tTween.animate("height", Math.ceil(_images.length / 4) * 45);
+			}
 			tTween.onComplete = onTweenComplete;
 			Starling.juggler.add(tTween);
 			
@@ -146,12 +152,15 @@ package
 		}
 		
 		private function onTweenComplete():void {
-			if(_status == COLLAPSED)
+			if(_status == COLLAPSED){
 				_status = EXPANDED;
-			else
+			}
+			else{
 				_status = COLLAPSED;
+				_imageThumbsContainer.visible = false;
+			}
 			
-			dispatchEventWith("blockElements", true, false);
+			dispatchEventWith("DDTweenComplete", true, false);
 		}
 		
 		public function get description():String
@@ -159,12 +168,12 @@ package
 			return _description;
 		}
 
-		public function set setY(y:int):void {
+		public function set setY(y:Number):void {
 			this.y = y;
 			_imageThumbsContainer.clipRect.y = y + _componentHeight - 1;
 		}
 		
-		public function get setY():int {
+		public function get setY():Number {
 			return this.y;
 		}
 		
@@ -196,7 +205,7 @@ package
 		//here we set the initial amount of images that the component will comprehend
 		public function setContent(images:Vector.<Image>):void {
 			_images = images;
-			_imageThumbsContainer.clipRect = new Rectangle(this.x, this.y + _componentHeight, _componentWidth, 1);
+			_imageThumbsContainer.clipRect = new Rectangle(this.x, this.y + _componentHeight - 1, _componentWidth, 1);
 			var bgQuad:Quad = new Quad(_componentWidth, getContentHeight(), 0xE5E5E5);
 			bgQuad.y = _imageThumbsContainer.clipRect.y;
 			_imageThumbsContainer.addChild(bgQuad);
